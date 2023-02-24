@@ -20,7 +20,7 @@ By using supervised and semi-supervised learning, I decided to develop an Anomal
 
 ## Key Findings
 
-### There is a linear seperable boundary between loitering signatures of vessels exhibiting IUU vs. non-IUU behaviours. This linear boundary can be exploited to develop a comprehensive Anomaly Detection Model that can detect IUU signatures in real-time
+### Binary Classification is possible between loitering signatures of vessels exhibiting IUU vs. non-IUU behaviours. A decision boundary can be exploited to develop a comprehensive Anomaly Detection Model that can detect IUU signatures in real-time
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ By using supervised and semi-supervised learning, I decided to develop an Anomal
   - [Tech Stack](#tech-stack)
   - [Quick Peek at Results](#quick-peek-at-results)
   - [Conclusions and Lessons Learned](#conclusions-and-lessons-learned)
-  - [Limitations and Further Improvements](#limitation-and-further-improvements)
+  - [Limitations and Further Improvements](#limitations-and-further-improvements)
   - [License](#license)
 
 
@@ -53,20 +53,77 @@ No explicit dataset was readily available. I used secondary datasets from curren
 
 ## Methods
 
-
+- Data assembly and cleanup
+- Exploratory data analysis
+- Principal Component Analysis
+- Machine Learning usign Sci-kit Learn 
+    - Supervised Learning Models (Log Regression, SVM, Random Forests)
+    - Semi-supervised Learning (Psuedo-Label Propogation)
+    - Anomaly Detection (One Class SVM)
+- Visualizations
 
 ## Tech Stack
-
+- GFW API
+- Python
+- Pandas
+- Scikit-Learn
+- Seaborn
 
 ## Quick Peek at Results
 
+Raw Data of Loitering events (labelled and unlabelled data)
+
+![rawdata](assets/img/rawdata.png)
+
+Correlation Matrix of Features
+
+![rawdata](assets/img/corrmatrix.png)
+
+PCA Analysis showing a BINARY CLASSFIICATION decision boundary may be learned
+
+![rawdata](assets/img/linearboundary.png)
+
+Example of Precision-Recall Curves for Logistic Regression
+
+![rawdata](assets/img/prcurveslog.png)
+
+Verifying newly trained model on test data after propogating the Psuedo-Labels using Semi-Supervised Learning. Shown below is visualization of the confusion matrix
+
+![rawdata](assets/img/confmatrix.png)
+
+Visualizing the classified IUU vs. non-IUU loitering events
+
+![rawdata](assets/img/eventsidentified.png)
+
+Since the dataset is imbalanced, F2 Score is used (Recall is weighted twice as much as Precision in the F-score). Rationale for this choice: it is preferential to identify IUU events with high confidence; it is crucial to correctly identify IUU events than to incorrectly classify them. Furthermore, we care about detecting IUU events with high certainty than IUU events closer to the decision boundary. Therefore, False Positives (FP), where model incorrectly classifies IUU as non-IUU, need to be weighted more False Negatives (FN), where model incorrectly classifies non-IUU as IUU, when making decisions. 
+
+Final Model Balaced Accuracy - 86%
 
 ## Conclusions and Lessons Learned
 
+The analysis of the loitering event dataset was able to determine a decision boundary that classified the loitering event as IUU activity or non-IUU activity. By using a supervised model trained on labeled data, the larger unlabeled dataset was pseudo-labeled to develop a robust anomaly detection model. This model can correctly classify the loitering events with up to 86% accuracy, as well as provide a ranking method that can be utilized by the end users to efficiently plan their inspection activities. Furthermore, the analysis also determined that distance from shore is the biggest indicator of an IUU event. Here is the breakdown
+
+| Feature                                         | Importance   |
+|------------------------------------------------ |--------------|
+| Average Distance from Shore (nautical miles)    | 72.6897%     |
+| Loitering Start Hour                            | 12.0359%     |
+| Loitering Total Hours                           | 10.8072%     |
+| Average Speed (knots)                           | 4.4672%      |
+
+We see from the Model Labels that False Negative scores (non-IUU events classified as IUU event) lie close to the decision boundary; thus, ranking anomalies by their score remains a valid tactic to prioritize inspection of vessels by the appropriate authorities, as well as minimizing incorrect allocation of inspection resources. Ranking in this manner will reduce the chance of inspecting a legal vessel; this was made possible by weighing Recall more during model training.
+
+Conversely, False Positives (IUU events classified as non-IUU events) scoring cannot be ranked. However, this is not necessary as there are no action-items for an in-class event. These IUU events will be missed 
 
 ## Limitations and Further Improvements
 
-adf
+GFW’s classification model outputs whether a ship is suspected to have engaged in human trafficking over the course of the study period. Thus, an assumption required in the proposal is that the presence of human trafficking indicates IUU fishing activities as well. This is a valid assumption; police/enforcement agency reports have confirmed that ships use slave labor obtained through human trafficking for IUU fishing activities.
+
+A limitation of this analysis results from requiring labelled data of ships that are suspected to engage in IUU events. Since this predisposition biases the data towards focusing on suspect ships, the dataset has an unproportionally high number of positive classifications to negative classifications, as compared to the large number of loitering events. The train/test split size and performance metrics are selected to handle these imbalanced proportions.
+
+For the next steps in this analysis, I would like to use more sophisticated models to try an model the decision boundary, such as Deep Learning. I will also contact Global Fishing Watch to determine if there is any unpublished data available internally that can be used to further strengthen this analysis, such as more labeled data or additional features that could be added. Going further, the model can be deployed for practical use; the results from any action taken because of the model’s output should be used to further train and strengthen the model.
+
+Even on the nearly unmonitored ocean where human activities can largely go unnoticed, the use of such data analyses is crucial to identify and prosecute vessels engaged in illegal activities that harm the delicate ecosystem, violate human rights, and nullify the efforts of law-abiding fishing organizations. 
+
 
 ## License
 
